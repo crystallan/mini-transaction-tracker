@@ -1,4 +1,4 @@
-package com.transaction.mini_transaction_tracker.ui.theme
+package com.transaction.mini_transaction_tracker.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
