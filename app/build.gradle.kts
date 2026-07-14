@@ -12,6 +12,11 @@ android {
             minorApiLevel = 1
         }
     }
+    compileOptions{
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
 
     defaultConfig {
         applicationId = "com.transaction.mini_transaction_tracker"
@@ -29,10 +34,6 @@ android {
                 enable = false
             }
         }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
     }
     buildFeatures {
         compose = true
@@ -58,6 +59,8 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.kotlinx.serialization.json)
+
+    coreLibraryDesugaring(libs.android.desugarJdkLibs)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
