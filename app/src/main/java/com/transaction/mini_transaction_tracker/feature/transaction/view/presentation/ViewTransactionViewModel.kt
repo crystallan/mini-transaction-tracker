@@ -3,9 +3,11 @@ package com.transaction.mini_transaction_tracker.feature.transaction.view.presen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.transaction.mini_transaction_tracker.core.domain.model.Transaction
+import com.transaction.mini_transaction_tracker.core.domain.model.TransactionType
 import com.transaction.mini_transaction_tracker.core.domain.usecase.DeleteTransactionUseCase
 import com.transaction.mini_transaction_tracker.core.domain.usecase.GetTransactionUseCase
 import com.transaction.mini_transaction_tracker.core.domain.utils.OrderType
+import com.transaction.mini_transaction_tracker.core.domain.utils.TransactionFilter
 import com.transaction.mini_transaction_tracker.core.domain.utils.TransactionOrder
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,15 +35,21 @@ class ViewTransactionViewModel(
     private val _pendingDeleteTransaction = MutableStateFlow<Transaction?>(null)
     val pendingDeleteTransaction: StateFlow<Transaction?> = _pendingDeleteTransaction.asStateFlow()
 
+    private val _currentOrder = MutableStateFlow<TransactionOrder>(TransactionOrder.Date(OrderType.Descending))
+    val currentOrder: StateFlow<TransactionOrder> = _currentOrder.asStateFlow()
+
+    private val _currentFilter = MutableStateFlow(TransactionFilter())
+    val currentFilter : StateFlow<TransactionFilter> = _currentFilter.asStateFlow()
+
     private var getTransactionsJob: Job? = null
 
     init {
-        loadTransactions(TransactionOrder.Date(OrderType.Descending))
+        loadTransactions()
     }
 
-    fun loadTransactions(transactionOrder: TransactionOrder) {
+    fun loadTransactions() {
         getTransactionsJob?.cancel()
-        getTransactionsJob = getTransactionUseCase(transactionOrder)
+        getTransactionsJob = getTransactionUseCase(_currentOrder.value, _currentFilter.value)
                 .onEach { transactions ->
                     _uiState.value = ViewTransactionUiState.Success(transactions)
                 }
@@ -51,6 +59,21 @@ class ViewTransactionViewModel(
                 }
             .launchIn(viewModelScope)
         }
+
+    fun onSortOrderSelected ( order : TransactionOrder){
+        _currentOrder.value = order
+        loadTransactions()
+    }
+
+    fun onKeywordChanged (keyword : String){
+        _currentFilter.value = _currentFilter.value.copy(keyword = keyword)
+        loadTransactions()
+    }
+
+    fun onTypeFilterSelected(type : TransactionType?){
+        _currentFilter.value = _currentFilter.value.copy(type = type)
+        loadTransactions()
+    }
 
     fun requestDelete(transaction: Transaction){
         _pendingDeleteTransaction.value = transaction

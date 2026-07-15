@@ -4,7 +4,6 @@ import com.transaction.mini_transaction_tracker.core.domain.model.Transaction
 import com.transaction.mini_transaction_tracker.core.domain.model.ValidationResult
 import com.transaction.mini_transaction_tracker.core.domain.repository.TransactionRepository
 
-
 class AddTransactionUseCase (
     private val repository: TransactionRepository,
     private val validateTransaction: ValidateTransactionUseCase
@@ -12,7 +11,8 @@ class AddTransactionUseCase (
     suspend operator fun invoke(transaction: Transaction) {
         val result = validateTransaction(transaction)
         if ( result is ValidationResult.Invalid){
-            throw IllegalArgumentException(result.message)
+            val combinedMessage = result.errors.joinToString(separator = " ") { it.message }
+            throw IllegalArgumentException(combinedMessage)
         }
         repository.insertTransaction(transaction)
     }
