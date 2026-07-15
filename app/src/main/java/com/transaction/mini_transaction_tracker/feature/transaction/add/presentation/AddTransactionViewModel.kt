@@ -1,4 +1,6 @@
 package com.transaction.mini_transaction_tracker.feature.transaction.add.presentation
 
-class AddTransactionViewModel {
+import androidx.lifecycle.ViewModel
+
+class AddTransactionViewModel : ViewModel() {
 }

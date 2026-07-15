@@ -8,8 +8,8 @@ plugins {
 android {
     namespace = "com.transaction.mini_transaction_tracker"
     compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
+        version = release(37) {
+            minorApiLevel = 0
         }
     }
     compileOptions{
@@ -21,7 +21,7 @@ android {
     defaultConfig {
         applicationId = "com.transaction.mini_transaction_tracker"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
