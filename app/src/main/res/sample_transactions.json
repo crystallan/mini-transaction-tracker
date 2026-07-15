@@ -1,0 +1,82 @@
+[
+  {
+    "id": "1",
+    "amount": 2500.0,
+    "description": "Salary deposit",
+    "date": "2026-07-01 09:00:00.000000",
+    "type": "credit",
+    "category": "Income"
+  },
+  {
+    "id": "2",
+    "amount": 45.99,
+    "description": "Grocery store",
+    "date": "2026-07-02 14:32:00.000000",
+    "type": "debit",
+    "category": "Groceries"
+  },
+  {
+    "id": "3",
+    "amount": 12.5,
+    "description": "Coffee shop",
+    "date": "2026-07-03 08:15:00.000000",
+    "type": "debit",
+    "category": "Dining"
+  },
+  {
+    "id": "4",
+    "amount": 800.0,
+    "description": "Rent payment",
+    "date": "2026-07-05 10:00:00.000000",
+    "type": "debit",
+    "category": "Housing"
+  },
+  {
+    "id": "5",
+    "amount": 150.0,
+    "description": "Freelance project payment",
+    "date": "2026-07-07 16:45:00.000000",
+    "type": "credit",
+    "category": "Income"
+  },
+  {
+    "id": "6",
+    "amount": 60.0,
+    "description": "Electricity bill",
+    "date": "2026-07-08 11:20:00.000000",
+    "type": "debit",
+    "category": "Utilities"
+  },
+  {
+    "id": "7",
+    "amount": 25.0,
+    "description": "Movie tickets",
+    "date": "2026-07-10 19:30:00.000000",
+    "type": "debit",
+    "category": "Entertainment"
+  },
+  {
+    "id": "8",
+    "amount": 500.0,
+    "description": "Transfer from savings",
+    "date": "2026-07-11 07:05:00.000000",
+    "type": "credit",
+    "category": "Transfer"
+  },
+  {
+    "id": "9",
+    "amount": 35.75,
+    "description": "Gas station",
+    "date": "2026-07-12 17:50:00.000000",
+    "type": "debit",
+    "category": "Transport"
+  },
+  {
+    "id": "10",
+    "amount": 89.99,
+    "description": "Online shopping",
+    "date": "2026-07-13 21:10:00.000000",
+    "type": "debit",
+    "category": "Shopping"
+  }
+]
