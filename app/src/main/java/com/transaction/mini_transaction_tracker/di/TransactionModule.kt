@@ -24,7 +24,8 @@ object TransactionModule {
         factory { SeedDatabaseUseCase(get(), get()) }
 
         viewModel { ViewTransactionViewModel(get(), get()) }
-        viewModel { AddTransactionViewModel() }
-        viewModel { TransactionDetailViewModel() }
+        viewModel { AddTransactionViewModel(get(), get()) }
+        factory { (id: Int) -> TransactionDetailViewModel( id , get()) }
+        factory { AddTransactionViewModel(get(), get()) }
     }
 }
