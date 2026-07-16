@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.transaction.mini_transaction_tracker.core.domain.model.Transaction
 import com.transaction.mini_transaction_tracker.core.domain.model.TransactionType
 import com.transaction.mini_transaction_tracker.core.domain.usecase.DeleteTransactionUseCase
+import com.transaction.mini_transaction_tracker.core.domain.usecase.GetBalanceUseCase
 import com.transaction.mini_transaction_tracker.core.domain.usecase.GetTransactionUseCase
 import com.transaction.mini_transaction_tracker.core.domain.utils.OrderType
 import com.transaction.mini_transaction_tracker.core.domain.utils.TransactionFilter
 import com.transaction.mini_transaction_tracker.core.domain.utils.TransactionOrder
+import com.transaction.mini_transaction_tracker.core.utils.Currency
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 sealed interface ViewTransactionUiState{
     data object Loading : ViewTransactionUiState
@@ -26,7 +29,8 @@ sealed interface ViewTransactionUiState{
 
 class ViewTransactionViewModel(
     private val getTransactionUseCase: GetTransactionUseCase,
-    private val deleteTransactionUseCase: DeleteTransactionUseCase
+    private val deleteTransactionUseCase: DeleteTransactionUseCase,
+    private val getBalanceUseCase: GetBalanceUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ViewTransactionUiState>(ViewTransactionUiState.Loading)
@@ -41,10 +45,21 @@ class ViewTransactionViewModel(
     private val _currentFilter = MutableStateFlow(TransactionFilter())
     val currentFilter : StateFlow<TransactionFilter> = _currentFilter.asStateFlow()
 
+    private val _balance = MutableStateFlow(BigDecimal.ZERO)
+    val balance : StateFlow<BigDecimal> = _balance.asStateFlow()
+
+    private val _balanceError = MutableStateFlow<String?>(null)
+    val balanceError: StateFlow<String?> = _balanceError.asStateFlow()
+
+    private val _displayCurrency = MutableStateFlow(Currency.KES)
+    val displayCurrency: StateFlow<Currency> = _displayCurrency.asStateFlow()
+
     private var getTransactionsJob: Job? = null
+    private var getBalanceJob: Job? = null
 
     init {
         loadTransactions()
+        loadBalance()
     }
 
     fun loadTransactions() {
@@ -65,6 +80,18 @@ class ViewTransactionViewModel(
         loadTransactions()
     }
 
+    fun loadBalance(){
+        getBalanceJob?.cancel()
+        getBalanceJob = getBalanceUseCase()
+            .onEach { total ->
+                _balance.value = total
+            }
+            .catch { exception ->
+                _balanceError.value = exception.message ?: "Failed to load balance"
+            }
+            .launchIn(viewModelScope)
+    }
+
     fun onKeywordChanged (keyword : String){
         _currentFilter.value = _currentFilter.value.copy(keyword = keyword)
         loadTransactions()
@@ -73,6 +100,10 @@ class ViewTransactionViewModel(
     fun onTypeFilterSelected(type : TransactionType?){
         _currentFilter.value = _currentFilter.value.copy(type = type)
         loadTransactions()
+    }
+
+    fun onDisplayCurrencyToggled() {
+        _displayCurrency.value = if (_displayCurrency.value == Currency.KES) Currency.USD else Currency.KES
     }
 
     fun requestDelete(transaction: Transaction){
@@ -91,9 +122,4 @@ class ViewTransactionViewModel(
         _pendingDeleteTransaction.value = null
     }
 
-    fun deleteTransaction(transaction: Transaction){
-        viewModelScope.launch {
-            deleteTransactionUseCase(transaction)
-        }
-    }
 }
