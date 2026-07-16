@@ -20,4 +20,8 @@ class Converters {
     fun toLocalDateTime(value: String?): LocalDateTime? = value?.let { LocalDateTime.parse(it) }
 
     @TypeConverter
-    fun toTransactionType(value: String?): TransactionType? = value?.let { TransactionType.valueOf(it) }}
+    fun toTransactionType(value: String?): TransactionType? = value?.let { TransactionType.valueOf(it) }
+
+    @TypeConverter
+    fun fromTransactionType(value: TransactionType?): String? = value?.name
+}

@@ -123,7 +123,7 @@ fun AddTransactionScreen(
                 onClick = { showDatePicker = true },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(DateUtils.formatForDisplay(uiState.date))
+                Text(DateUtils.formatDateOnly(uiState.date))
             }
             uiState.dateError?.let { Text(it) }
 

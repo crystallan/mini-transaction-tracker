@@ -8,7 +8,5 @@ data class TransactionFilter (
     val type: TransactionType? = null,
     val keyword: String = "",
     val startDate: LocalDateTime? = null,
-    val endDate: LocalDateTime? = null,
-    val minAmount: BigDecimal? = null,
-    val maxAmount: BigDecimal? = null
+    val endDate: LocalDateTime? = null
 )
