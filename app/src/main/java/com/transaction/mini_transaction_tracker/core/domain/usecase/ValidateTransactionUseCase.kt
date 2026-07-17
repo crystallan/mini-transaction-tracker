@@ -9,19 +9,40 @@ import java.time.LocalDateTime
 
 class ValidateTransactionUseCase {
 
-    operator fun invoke( transaction: Transaction) : ValidationResult {
+    operator fun invoke(transaction: Transaction): ValidationResult =
+        build(validate(transaction.amount, transaction.description, transaction.date))
+
+    operator fun invoke(
+        rawAmount: String,
+        description: String,
+        date: LocalDateTime
+    ): ValidationResult =
+        build(validate(rawAmount.toBigDecimalOrNull(), description, date))
+
+    private fun validate(
+        amount: BigDecimal?,
+        description: String,
+        date: LocalDateTime
+    ): List<FieldError> {
         val errors = mutableListOf<FieldError>()
 
-        if (transaction.amount <= BigDecimal.ZERO) {
-            errors += FieldError(ValidationField.AMOUNT, "Amount must be greater than zero.")
+        when {
+            amount == null -> errors += FieldError(ValidationField.AMOUNT, "Enter a valid number.")
+            amount <= BigDecimal.ZERO -> errors += FieldError(
+                ValidationField.AMOUNT,
+                "Amount must be greater than zero."
+            )
         }
-        if (transaction.description.isBlank()) {
+        if (description.isBlank()) {
             errors += FieldError(ValidationField.DESCRIPTION, "Description cannot be empty.")
         }
-        if (transaction.date.isAfter(LocalDateTime.now())) {
+        if (date.isAfter(LocalDateTime.now())) {
             errors += FieldError(ValidationField.DATE, "Date cannot be in the future.")
         }
 
-        return if (errors.isEmpty()) ValidationResult.Valid else ValidationResult.Invalid(errors)
+        return errors
     }
+
+    private fun build(errors: List<FieldError>) =
+        if (errors.isEmpty()) ValidationResult.Valid else ValidationResult.Invalid(errors)
 }

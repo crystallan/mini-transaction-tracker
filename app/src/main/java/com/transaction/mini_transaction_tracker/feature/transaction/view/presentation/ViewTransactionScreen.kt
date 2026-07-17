@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,13 +17,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,11 +36,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,6 +63,7 @@ import com.transaction.mini_transaction_tracker.core.utils.CurrencyUtils
 import com.transaction.mini_transaction_tracker.core.utils.DateUtils
 import org.koin.androidx.compose.koinViewModel
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,12 +79,19 @@ fun ViewTransactionScreen(
     val balance by viewModel.balance.collectAsState()
     val balanceError by viewModel.balanceError.collectAsState()
     val displayCurrency by viewModel.displayCurrency.collectAsState()
+    var showDateFilterSheet by remember { mutableStateOf(false) }
+    var startDate by remember { mutableStateOf<LocalDateTime?>(null) }
+    var endDate by remember { mutableStateOf<LocalDateTime?>(null) }
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
     var sortMenuExpanded by remember { mutableStateOf(false) }
 
-    fun displayAmount(amount: BigDecimal): String =
-        if (displayCurrency == Currency.KES) CurrencyUtils.format(amount, Currency.KES)
+    fun displayAmount(amount: BigDecimal, type: TransactionType): String {
+        val formatted = if (displayCurrency == Currency.KES) CurrencyUtils.format(amount, Currency.KES)
         else CurrencyUtils.convertAndFormat(amount, Currency.KES, Currency.USD)
-
+        val sign = if (type == TransactionType.CREDIT) "+ " else "- "
+        return sign + formatted
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -82,6 +99,9 @@ fun ViewTransactionScreen(
                 actions = {
                     IconButton(onClick = viewModel::onDisplayCurrencyToggled) {
                         Icon(Icons.Default.SwapHoriz, contentDescription = "Toggle currency (${displayCurrency.code})")
+                    }
+                    IconButton(onClick = { showDateFilterSheet = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Filter by date")
                     }
                     Box {
                         IconButton(onClick = { sortMenuExpanded = true }) {
@@ -178,10 +198,19 @@ fun ViewTransactionScreen(
                 ) {
                     Text("Balance", style = MaterialTheme.typography.labelMedium)
                     Text(
-                        text = displayAmount(balance),
+                        text = if (displayCurrency == Currency.KES) CurrencyUtils.format(balance, Currency.KES)
+                        else CurrencyUtils.convertAndFormat(balance, Currency.KES, Currency.USD),
                         style = MaterialTheme.typography.headlineMedium,
                         color = if (balance < BigDecimal.ZERO) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                     )
+                    if (balance < BigDecimal.ZERO) {
+                        Text(
+                            text = "Your balance is negative.",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
                     if (balanceError != null) {
                         Text(
                             text = balanceError!!,
@@ -231,7 +260,7 @@ fun ViewTransactionScreen(
                                 items(state.transactions) { transaction ->
                                     TransactionItem(
                                         transaction = transaction,
-                                        formattedAmount = displayAmount(transaction.amount),
+                                        formattedAmount = displayAmount(transaction.amount, transaction.type),
                                         onClick = { onTransactionClick(transaction.id) },
                                         onDeleteClick = { viewModel.requestDelete(transaction) }
                                     )
@@ -251,6 +280,96 @@ fun ViewTransactionScreen(
             onDismiss = viewModel::dismissDeleteConfirmation
         )
     }
+
+    if (showDateFilterSheet) {
+        ModalBottomSheet(onDismissRequest = { showDateFilterSheet = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                Text("Filter by date", style = MaterialTheme.typography.titleMedium)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedButton(
+                    onClick = { showStartDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(startDate?.let { DateUtils.formatDateOnly(it) } ?: "Start date")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = { showEndDatePicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(endDate?.let { DateUtils.formatDateOnly(it) } ?: "End date")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    TextButton(onClick = {
+                        startDate = null
+                        endDate = null
+                        viewModel.onDateRangeSelected(null, null)
+                        showDateFilterSheet = false
+                    }) { Text("Clear") }
+
+                    Button(onClick = {
+                        viewModel.onDateRangeSelected(startDate, endDate)
+                        showDateFilterSheet = false
+                    }) { Text("Apply") }
+                }
+            }
+        }
+    }
+
+    if (showStartDatePicker) {
+        val startPickerState = rememberDatePickerState()
+        DatePickerDialog(
+            onDismissRequest = { showStartDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    startPickerState.selectedDateMillis?.let { millis ->
+                        startDate = DateUtils.startOfDay(DateUtils.millisToLocalDate(millis))
+                    }
+                    showStartDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showStartDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = startPickerState)
+        }
+    }
+
+    if (showEndDatePicker) {
+        val endPickerState = rememberDatePickerState()
+        DatePickerDialog(
+            onDismissRequest = { showEndDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    endPickerState.selectedDateMillis?.let { millis ->
+                        endDate = DateUtils.endOfDay(DateUtils.millisToLocalDate(millis))
+                    }
+                    showEndDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEndDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = endPickerState)
+        }
+    }
+
 }
 
 @Composable
@@ -262,7 +381,7 @@ private fun DeleteConfirmationDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Delete Transaction") },
-        text = { Text("Are you sure you want to delete this transaction?") },
+        text = { Text("Delete \"${transaction.description}\"? This can't be undone.") },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text("Delete", color = MaterialTheme.colorScheme.error)
@@ -290,36 +409,51 @@ fun TransactionItem(
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            Text(
-                text = DateUtils.formatDateOnly(transaction.date),
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = transaction.description,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = formattedAmount,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            IconButton(onClick = onDeleteClick) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete Transaction"
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = DateUtils.formatDateOnly(transaction.date),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Text(
+                    text = formattedAmount,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = when (transaction.type) {
+                        TransactionType.CREDIT -> MaterialTheme.colorScheme.primary
+                        TransactionType.DEBIT -> MaterialTheme.colorScheme.error
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text(
+                    text = transaction.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Transaction"
+                    )
+                }
             }
         }
     }

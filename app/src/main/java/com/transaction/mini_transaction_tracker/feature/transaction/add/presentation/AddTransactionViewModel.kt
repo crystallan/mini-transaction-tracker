@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDateTime
 
 data class AddTransactionUiState(
@@ -63,28 +64,7 @@ class AddTransactionViewModel(
 
     private fun validateForm(): BigDecimal? {
         val currentState = _uiState.value
-        val parsedAmount = currentState.amount.toBigDecimalOrNull()
-
-        if (parsedAmount == null) {
-            _uiState.update {
-                it.copy(
-                    amountError = "Enter a valid number.",
-                    descriptionError = if (currentState.description.isBlank())
-                        "Description cannot be empty." else null,
-                    dateError = null
-                )
-            }
-            return null
-        }
-
-        val draftTransaction = Transaction(
-            amount = parsedAmount,
-            description = currentState.description,
-            date = currentState.date,
-            type = currentState.type
-        )
-
-        val result = validateTransactionUseCase(draftTransaction)
+        val result = validateTransactionUseCase(currentState.amount, currentState.description, currentState.date)
 
         _uiState.update { state ->
             when (result) {
@@ -104,9 +84,11 @@ class AddTransactionViewModel(
             }
         }
 
-        return if (result is ValidationResult.Valid) parsedAmount else null
-    }
+        if (result !is ValidationResult.Valid) return null
 
+        return currentState.amount.toBigDecimalOrNull()
+            ?.setScale(2, RoundingMode.HALF_UP)
+    }
     fun submitTransaction() {
         val parsedAmount = validateForm() ?: return
 

@@ -7,7 +7,7 @@ import java.text.NumberFormat
 import java.util.Locale
 
 enum class Currency(val code: String, val locale: Locale) {
-    KES("KES", Locale("en", "KE")),
+    KES("KES", Locale.Builder().setLanguage("en").setRegion("KE").build()),
     USD("USD", Locale.US)
 }
 
@@ -27,11 +27,13 @@ object CurrencyUtils {
     fun convertAndFormat(amount: BigDecimal, from: Currency, to: Currency): String {
         if (from == to) return format(amount, to)
 
-        val converted = when {
-            from == Currency.KES && to == Currency.USD ->
+        val converted = when (from) {
+            Currency.KES if to == Currency.USD ->
                 amount.multiply(KES_TO_USD_RATE, MathContext.DECIMAL64)
-            from == Currency.USD && to == Currency.KES ->
+
+            Currency.USD if to == Currency.KES ->
                 amount.divide(KES_TO_USD_RATE, MathContext.DECIMAL64)
+
             else -> throw IllegalArgumentException("No rate available for $from -> $to")
         }.setScale(2, RoundingMode.HALF_UP)
 
