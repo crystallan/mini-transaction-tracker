@@ -2,7 +2,7 @@
 
 # Allan Korir
 
-A local-first personal wallet ledger for tracking money in and out of an account. Built for Kocela's Mobile Application Developer take-home task.
+A personal wallet ledger for tracking money in and out of an account. Built for Kocela's Mobile Application Developer take-home task.
 
 ---
 
@@ -41,7 +41,7 @@ A local-first personal wallet ledger for tracking money in and out of an account
 2. Open in Android Studio Version 26.1.2 (Quail 2)
 3. Let Gradle sync
 4. Build → Select Build Variant in Android Studio → change `app` from `debug` to `release`
-5. Run on an emulator or physical device (**min SDK 24**)
+5. Run on an emulator or physical device - SDK 24 ideal
 6. The app seeds the sample transactions from `assets/sample_transactions.json` on first launch
 
 Note: Release build variants reduce overhead and run smoother than debug builds. This project currently builds with the default debug keystore which is acceptable for development.
@@ -142,7 +142,7 @@ All three checks run together and return every applicable error at once
 3. **Move balance to a SQL `SUM` aggregate** 
 4. **Move filtering to SQL-level queries** - If provided with a larger dataset
 5. **Edit-transaction flow** 
-6. **`SavedStateHandle`** on `AddTransactionViewModel` so in-progress form input survives process death
+6. **Saved State Handling** - In the add transaction flow, saved state would be use to persist in-progress form inputs so that they would survive process death
 7. **Room migration strategy** — currently schema version 1, no upgrade path defined yet
 8. **Mock API handling** - Use of RetroFit and OkHttp to simulate how an api request and response would be handled
 9. **Figma Mockups** - To directly guide the development of the UI
