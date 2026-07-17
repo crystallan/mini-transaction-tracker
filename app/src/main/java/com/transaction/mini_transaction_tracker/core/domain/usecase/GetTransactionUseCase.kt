@@ -37,7 +37,6 @@ class GetTransactionUseCase(
                     is TransactionOrder.Amount -> transactions.sortedBy { it.amount }
                     is TransactionOrder.Date -> transactions.sortedBy { it.date }
                     is TransactionOrder.Description -> transactions.sortedBy { it.description }
-                    is TransactionOrder.Type -> transactions.sortedBy { it.type }
                 }
             }
             is OrderType.Descending -> {
@@ -45,7 +44,6 @@ class GetTransactionUseCase(
                     is TransactionOrder.Amount -> transactions.sortedByDescending { it.amount }
                     is TransactionOrder.Date -> transactions.sortedByDescending { it.date }
                     is TransactionOrder.Description -> transactions.sortedByDescending { it.description }
-                    is TransactionOrder.Type -> transactions.sortedByDescending { it.type }
                 }
             }
         }

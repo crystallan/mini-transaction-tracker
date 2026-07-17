@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 sealed interface ViewTransactionUiState{
     data object Loading : ViewTransactionUiState
@@ -99,6 +100,11 @@ class ViewTransactionViewModel(
 
     fun onTypeFilterSelected(type : TransactionType?){
         _currentFilter.value = _currentFilter.value.copy(type = type)
+        loadTransactions()
+    }
+
+    fun onDateRangeSelected(start: LocalDateTime?, end: LocalDateTime?) {
+        _currentFilter.value = _currentFilter.value.copy(startDate = start, endDate = end)
         loadTransactions()
     }
 

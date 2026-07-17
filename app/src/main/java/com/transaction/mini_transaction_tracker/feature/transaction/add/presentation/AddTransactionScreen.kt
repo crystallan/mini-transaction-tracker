@@ -41,9 +41,6 @@ import com.transaction.mini_transaction_tracker.core.utils.DateUtils
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.ZoneOffset
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -151,8 +148,7 @@ fun AddTransactionScreen(
                         val pickedDate = Instant.ofEpochMilli(millis)
                             .atZone(ZoneOffset.UTC)
                             .toLocalDate()
-                        val combined = LocalDateTime.of(pickedDate, LocalTime.now())
-                        viewModel.onDateChange(combined)
+                        viewModel.onDateChange(DateUtils.combineDateWithCurrentTime(pickedDate))
                     }
                     showDatePicker = false
                 }) { Text("OK") }

@@ -20,6 +20,9 @@ object DateUtils {
             .toLocalDate()
     }
 
+    fun startOfDay(date: LocalDate): LocalDateTime = LocalDateTime.of(date, LocalTime.MIN)
+    fun endOfDay(date: LocalDate): LocalDateTime = LocalDateTime.of(date, LocalTime.of(23, 59, 59))
+
     fun combineDateWithCurrentTime(pickedDate: LocalDate): LocalDateTime {
         return LocalDateTime.of(pickedDate, LocalTime.now())
     }

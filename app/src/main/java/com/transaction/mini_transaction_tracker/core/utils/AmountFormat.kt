@@ -1,4 +1,0 @@
-package com.transaction.mini_transaction_tracker.core.utils
-
-class AmountFormat {
-}

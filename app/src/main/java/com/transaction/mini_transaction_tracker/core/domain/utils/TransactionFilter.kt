@@ -1,7 +1,6 @@
 package com.transaction.mini_transaction_tracker.core.domain.utils
 
 import com.transaction.mini_transaction_tracker.core.domain.model.TransactionType
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 data class TransactionFilter (
