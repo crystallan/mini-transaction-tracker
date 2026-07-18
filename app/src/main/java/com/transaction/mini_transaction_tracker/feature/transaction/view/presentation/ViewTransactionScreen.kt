@@ -166,6 +166,18 @@ fun ViewTransactionScreen(
                                         TransactionOrder.Description(OrderType.Ascending)
                                     ); sortMenuExpanded = false
                                 })
+                            DropdownMenuItem(
+                                text = { Text("Description (Z-A)") },
+                                trailingIcon = {
+                                    if (currentOrder is TransactionOrder.Description && currentOrder.orderType == OrderType.Descending) {
+                                        Icon(Icons.Default.Check, contentDescription = null)
+                                    }
+                                },
+                                onClick = {
+                                    viewModel.onSortOrderSelected(
+                                        TransactionOrder.Description(OrderType.Descending)
+                                    ); sortMenuExpanded = false
+                                })
                         }
                     }
                 }

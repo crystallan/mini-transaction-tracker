@@ -125,7 +125,7 @@ All three checks run together and return every applicable error at once
 <p align="center"><sub><b>Fig 5.</b> Sequence diagram — reactive list/balance sync via Room's Flow</sub></p>
 
 ## Decisions & Trade-offs
-
+- **Categorization not implemented** — Deliberately scoped out from provided seed data as I did not intend to pursue categorization in my attempt
 - **Clean Layered architecture** — chosen for consistency and alignment with production grade systems
 - **In-memory filtering + sorting + balance calculation** - The relatively small size of the dataset allowed for in Memory processes - if presented with a larger data set I would move to SQL @Query
 - **`BigDecimal` + text storage for amounts** — Precision and accuracy for monetary transactions - ie rounding off and decimals
@@ -139,14 +139,15 @@ All three checks run together and return every applicable error at once
 
 1. **Unit tests** — Specifically around the Use Cases to verify their correctness
 2. **At-rest encryption** — Encryption of the room database by using SQLCipher with a generated keys stored in the android keystore for safety
-3. **Move balance to a SQL `SUM` aggregate** 
-4. **Move filtering to SQL-level queries** - If provided with a larger dataset
-5. **Edit-transaction flow** 
-6. **Saved State Handling** - In the add transaction flow, saved state would be use to persist in-progress form inputs so that they would survive process death
-7. **Room migration strategy** — currently schema version 1, no upgrade path defined yet
-8. **Mock API handling** - Use of RetroFit and OkHttp to simulate how an api request and response would be handled
-9. **Figma Mockups** - To directly guide the development of the UI
-10. **Better/cleaner UI creation**
+3. **Proper categorization** - Make use of the categorisation data provided to ensure that transactions are categorised as expected
+4. **Move balance to a SQL `SUM` aggregate** 
+5. **Move filtering to SQL-level queries** - If provided with a larger dataset
+6. **Edit-transaction flow** 
+7. **`SavedStateHandle`** on `AddTransactionViewModel` so in-progress form input survives process death
+8. **Room migration strategy** — currently schema version 1, no upgrade path defined yet
+9. **Mock API handling** - Use of RetroFit and OkHttp to simulate how an api request and response would be handled
+10. **Figma Mockups** - To directly guide the development of the UI
+11.  **Better/cleaner UI creation**
 
 ---
 
