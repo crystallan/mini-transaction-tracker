@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.transaction.mini_transaction_tracker.core.domain.model.TransactionType
 import com.transaction.mini_transaction_tracker.core.utils.DateUtils
+import com.transaction.mini_transaction_tracker.core.utils.NumberCommaVisualTransformation
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import java.time.Instant
@@ -90,6 +91,7 @@ fun AddTransactionScreen(
                 supportingText = { uiState.amountError?.let { Text(it) } },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
+                visualTransformation = NumberCommaVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
 
