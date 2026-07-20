@@ -44,8 +44,6 @@ A personal wallet ledger for tracking money in and out of an account. Built for 
 5. Run on an emulator or physical device - SDK 24 ideal
 6. The app seeds the sample transactions from `assets/sample_transactions.json` on first launch
 
-Note: Release build variants reduce overhead and run smoother than debug builds. This project currently builds with the default debug keystore which is acceptable for development.
-
 ---
 ## Architecture
 
@@ -142,12 +140,13 @@ All three checks run together and return every applicable error at once
 3. **Proper categorization** - Make use of the categorisation data provided to ensure that transactions are categorised as expected
 4. **Move balance to a SQL `SUM` aggregate** 
 5. **Move filtering to SQL-level queries** - If provided with a larger dataset
-6. **Edit-transaction flow** 
-7. **`SavedStateHandle`** on `AddTransactionViewModel` so in-progress form input survives process death
-8. **Room migration strategy** — currently schema version 1, no upgrade path defined yet
-9. **Mock API handling** - Use of RetroFit and OkHttp to simulate how an api request and response would be handled
-10. **Figma Mockups** - To directly guide the development of the UI
-11.  **Better/cleaner UI creation**
+6. **Edit-transaction flow**
+7. **Proper Currency Conversion** – Use of an external API to pull multiple currencies and conversion rates, as well as allowing user to input their own rates
+8. **`SavedStateHandle`** on `AddTransactionViewModel` so in-progress form input survives process death
+9. **Room migration strategy** — currently schema version 1, no upgrade path defined yet
+10. **Mock API handling** - Use of RetroFit and OkHttp to simulate how an api request and response would be handled
+11. **Figma Mockups** - To directly guide the development of the UI
+12.  **Better/cleaner UI creation**
 
 ---
 
