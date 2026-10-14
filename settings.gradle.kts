@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Mini_Transaction_Tracker"
 include(":app")
- 
+include(":shared")
