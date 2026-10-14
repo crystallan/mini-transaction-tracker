@@ -9,7 +9,7 @@ android {
     namespace = "com.transaction.mini_transaction_tracker"
     compileSdk {
         version = release(37) {
-            minorApiLevel = 0
+            minorApiLevel = 1
         }
     }
     compileOptions{
@@ -42,6 +42,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":shared"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
@@ -64,12 +65,14 @@ dependencies {
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
 
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(kotlin("reflect"))
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.turbine)
 
 }

@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.transaction.mini_transaction_tracker.core.ui.theme.Mini_Transaction_TrackerTheme
-import com.transaction.mini_transaction_tracker.navigation.NavGraph
+import com.transaction.shared.navigation.NavGraph
+import com.transaction.shared.ui.theme.Mini_Transaction_TrackerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
