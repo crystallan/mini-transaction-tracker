@@ -12,6 +12,7 @@ import com.transaction.shared.domain.usecases.GetTransactionUseCase
 import com.transaction.shared.domain.usecases.SeedDatabaseUseCase
 import com.transaction.shared.domain.usecases.ValidateTransactionUseCase
 import com.transaction.shared.presentation.transaction.edit.presentation.EditTransactionViewModel
+import com.transaction.shared.storage.SeedStateStore
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -24,8 +25,8 @@ object TransactionModule {
         factory { GetTransactionDetailUseCase(get()) }
         factory { GetBalanceUseCase(get()) }
         factory { DeleteTransactionUseCase(get()) }
-        factory { SeedDatabaseUseCase(get(), get(), get()) }
-
+        factory { SeedDatabaseUseCase(get(), get(), get(), get()) }
+        single { SeedStateStore(get()) }
         viewModel { ViewTransactionViewModel(get(), get(), get()) }
         viewModel { AddTransactionViewModel(get(), get()) }
         factory { (id : Int) -> EditTransactionViewModel(get(), get(), get(),get()) }

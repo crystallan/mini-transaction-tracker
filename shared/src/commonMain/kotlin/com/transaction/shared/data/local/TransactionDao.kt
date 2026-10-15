@@ -20,6 +20,13 @@ interface TransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: TransactionEntity)
 
+    // Room runs a list @Insert inside one database transaction: all rows are written or none are
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTransactions(transactions: List<TransactionEntity>)
+
+    // Emptiness check without loading every row
+    @Query("SELECT EXISTS(SELECT 1 FROM TransactionEntity)")
+    suspend fun hasTransactions(): Boolean
     @Update
     suspend fun updateTransaction(transaction: TransactionEntity)
 

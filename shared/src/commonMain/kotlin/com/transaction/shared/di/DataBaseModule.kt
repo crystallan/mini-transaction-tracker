@@ -8,6 +8,8 @@ import com.transaction.shared.data.repository.TransactionRepositoryImpl
 import com.transaction.shared.domain.repository.TransactionRepository
 import com.transaction.shared.domain.seed.SeedAssetReader
 import com.transaction.shared.domain.seed.SeedDataSource
+import com.transaction.shared.domain.usecases.SeedDatabaseUseCase
+import com.transaction.shared.storage.SeedStateStore
 import org.koin.dsl.module
 
 object DataBaseModule {

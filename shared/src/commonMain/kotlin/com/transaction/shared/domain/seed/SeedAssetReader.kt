@@ -1,5 +1,10 @@
 package com.transaction.shared.domain.seed
 
-expect class SeedAssetReader {
-    fun readSeedJson(): String
+import com.transaction.shared.resources.Res
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+
+class SeedAssetReader {
+    @OptIn(ExperimentalResourceApi::class)
+    suspend fun readSeedJson(): String =
+        Res.readBytes("files/sample_transactions.json").decodeToString()
 }

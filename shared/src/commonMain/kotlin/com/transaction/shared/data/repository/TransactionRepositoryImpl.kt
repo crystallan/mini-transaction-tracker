@@ -20,6 +20,11 @@ class TransactionRepositoryImpl(
     override suspend fun insertTransaction(transaction: Transaction) =
         dao.insertTransaction(transaction.toEntity())
 
+    override suspend fun insertTransactions(transactions: List<Transaction>) =
+        dao.insertTransactions(transactions.map { it.toEntity() })
+
+    override suspend fun hasTransactions(): Boolean = dao.hasTransactions()
+
     override suspend fun updateTransaction(transaction: Transaction) =
         dao.updateTransaction(transaction.toEntity())
 

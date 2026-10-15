@@ -16,7 +16,16 @@ plugins {
 room {
     schemaDirectory("$projectDir/schemas")
 }
+
+compose.resources {
+    packageOfResClass = "com.transaction.shared.resources"
+}
+
 kotlin {
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
 
     // Target declarations - add or remove as needed below. These define
     // which platforms this KMP module supports.
@@ -29,6 +38,10 @@ kotlin {
             }
         }
         minSdk = 24
+
+        androidResources {
+            enable = true
+        }
 
         withHostTestBuilder {
         }
@@ -50,15 +63,10 @@ kotlin {
     val xcfName = "sharedKit"
 
 
-    iosArm64 {
-        binaries.framework {
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->
+        target.binaries.framework {
             baseName = xcfName
-        }
-    }
-
-    iosSimulatorArm64 {
-        binaries.framework {
-            baseName = xcfName
+            isStatic = true
         }
     }
 
@@ -136,6 +144,9 @@ kotlin {
                 // part of KMP’s default source set hierarchy. Note that this source set depends
                 // on common by default and will correctly pull the iOS artifacts of any
                 // KMP dependencies declared in commonMain.
+
+                implementation(libs.cryptography.core)
+                implementation(libs.cryptography.provider.cryptokit)
             }
         }
     }

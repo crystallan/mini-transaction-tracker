@@ -7,43 +7,40 @@ import androidx.compose.ui.text.input.VisualTransformation
 
 
 class NumberCommaVisualTransformation : VisualTransformation {
+
     override fun filter(text: AnnotatedString): TransformedText {
         val original = text.text
-        if (original.isEmpty()) return TransformedText(text, OffsetMapping.Identity)
+        val dot = original.indexOf('.')
+        val intPart = if (dot >= 0) original.substring(0, dot) else original
+        val rest = if (dot >= 0) original.substring(dot) else ""
 
-        val parts = original.split(".")
-        val intPart = parts[0]
-        val decimalPart = if (parts.size > 1) ".${parts[1]}" else ""
-
-        val formattedInt = if (intPart.isNotEmpty())
-            groupThousands(intPart.toLong()) else intPart
-        val formatted = formattedInt + decimalPart
+        val grouped = buildString {
+            intPart.forEachIndexed { index, c ->
+                if (index > 0 && (intPart.length - index) % 3 == 0) append(',')
+                append(c)
+            }
+        }
+        val formatted = grouped + rest
+        val totalCommas = grouped.length - intPart.length
 
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
-                val safeOffset = offset.coerceIn(0, original.length)
-                val commasBeforeInFormatted = formattedInt
-                    .take((safeOffset + (formattedInt.length - intPart.length)).coerceAtMost(formattedInt.length))
-                    .count { it == ',' }
-                return (safeOffset + commasBeforeInFormatted).coerceIn(0, formatted.length)
+                val o = offset.coerceIn(0, original.length)
+                // Past the integer part, every comma is before the cursor
+                return if (o > intPart.length) o + totalCommas
+                else o + commasBefore(intPart.length, o)
             }
 
             override fun transformedToOriginal(offset: Int): Int {
-                val safeOffset = offset.coerceIn(0, formatted.length)
-                val commasBefore = formatted.take(safeOffset).count { it == ',' }
-                return (safeOffset - commasBefore).coerceIn(0, original.length)
+                val t = offset.coerceIn(0, formatted.length)
+                return t - formatted.take(t).count { it == ',' }
             }
         }
 
         return TransformedText(AnnotatedString(formatted), offsetMapping)
     }
-    private fun groupThousands(value: Long): String {
-        val negative = value < 0
-        val digits = kotlin.math.abs(value).toString()
-        val grouped = digits.reversed()
-            .mapIndexed { index, c -> if (index != 0 && index % 3 == 0) ",$c" else "$c" }
-            .joinToString("")
-            .reversed()
-        return if (negative) "-$grouped" else grouped
-    }
+
+    /** Commas inserted before cursor [position] in an integer part of [intLength] digits. */
+    private fun commasBefore(intLength: Int, position: Int): Int =
+        (1 until position).count { (intLength - it) % 3 == 0 }
 }

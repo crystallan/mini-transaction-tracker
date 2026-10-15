@@ -23,6 +23,7 @@ import platform.Foundation.NSData
 import platform.Foundation.create
 import platform.Security.SecItemAdd
 import platform.Security.SecItemCopyMatching
+import platform.Security.errSecDuplicateItem
 import platform.Security.errSecItemNotFound
 import platform.Security.errSecSuccess
 import platform.Security.kSecAttrAccessible
@@ -62,8 +63,9 @@ class IosKeystoreManager : KeystoreManager {
         readKey(alias)?.let { return it }
         val key = aesGcm.keyGenerator(AES.Key.Size.B256).generateKeyBlocking()
         val bytes = key.encodeToByteArrayBlocking(AES.Key.Format.RAW)
-        writeKey(alias, bytes)
-        return bytes
+        // If another caller stored a key first, use theirs so all data shares one key
+        return if (writeKey(alias, bytes)) bytes
+        else readKey(alias) ?: error("Keychain reported a duplicate key for '$alias' but it could not be read")
     }
 
     private fun baseQuery(alias: String) = CFDictionaryCreateMutable(
@@ -96,14 +98,18 @@ class IosKeystoreManager : KeystoreManager {
         }
     }
 
-    private fun writeKey(alias: String, bytes: ByteArray) {
+    /** Returns true if the key was stored, false if a key for this alias already exists. */
+    private fun writeKey(alias: String, bytes: ByteArray): Boolean {
         val query = baseQuery(alias)
         val data = CFBridgingRetain(bytes.toNSData())
         CFDictionaryAddValue(query, kSecValueData, data)
         CFDictionaryAddValue(query, kSecAttrAccessible, kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly)
         try {
-            val status = SecItemAdd(query, null)
-            check(status == errSecSuccess) { "Keychain write failed: OSStatus $status" }
+            return when (val status = SecItemAdd(query, null)) {
+                errSecSuccess -> true
+                errSecDuplicateItem -> false
+                else -> error("Keychain write failed: OSStatus $status")
+            }
         } finally {
             CFRelease(data)
             CFRelease(query)

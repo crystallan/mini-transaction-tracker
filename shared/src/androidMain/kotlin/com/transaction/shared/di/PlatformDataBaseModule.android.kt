@@ -15,7 +15,7 @@ actual val platformDataBaseModule: Module = module {
     single {
         DatabaseBuilderFactory(androidContext())
     }
-    single { SeedAssetReader(androidContext()) }
+    single { SeedAssetReader() }
     single<DataStore<Preferences>> { createTransactionDataStore(androidContext()) }
     single<KeystoreManager> { AndroidKeystoreManager() }
 }

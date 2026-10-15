@@ -28,10 +28,11 @@ class TransactionBlobBackup(
     suspend fun ensureRestored() = restoreMutex.withLock {
         if (restoreDone) return@withLock
         try {
-            val roomIsEmpty = repository.getAllTransactions().first().isEmpty()
-            if (roomIsEmpty) {
+            if (!repository.hasTransactions()) {
                 // Unreadable or absent blobs come back as an empty list.
                 val snapshot = blobRepo.transactionFlow.first()
+                // One transaction: a partial restore must never be snapshotted over the full blob
+                repository.insertTransactions(snapshot.map { it.toTransaction() })
                 snapshot.forEach { repository.insertTransaction(it.toTransaction()) }
                 println("TransactionBlobBackup: restored ${snapshot.size} transactions from snapshot")
             } else {
