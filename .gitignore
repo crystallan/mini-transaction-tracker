@@ -13,3 +13,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Kotlin compiler metadata
+.kotlin
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+iosApp/**/xcuserdata/

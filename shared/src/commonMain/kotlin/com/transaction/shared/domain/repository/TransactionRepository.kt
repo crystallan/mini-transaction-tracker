@@ -11,6 +11,11 @@ interface TransactionRepository {
 
     suspend fun insertTransaction(transaction: Transaction)
 
+    /** Inserts all transactions atomically. */
+    suspend fun insertTransactions(transactions: List<Transaction>)
+
+    suspend fun hasTransactions(): Boolean
+
     suspend fun updateTransaction(transaction: Transaction)
 
     suspend fun deleteTransaction(transaction: Transaction)

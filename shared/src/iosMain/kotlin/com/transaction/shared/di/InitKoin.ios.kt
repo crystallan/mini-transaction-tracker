@@ -1,8 +1,6 @@
 package com.transaction.shared.di
 
+// Called once from the Swift app's init, before MainViewController() is shown.
 fun initKoinIOS() {
-    org.koin.core.context.startKoin {
-        modules(AppModule.all + platformDataBaseModule)
-    }
-    seedDatabase()
+    initKoin(platformDataBaseModule)
 }

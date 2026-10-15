@@ -9,6 +9,7 @@ import com.transaction.shared.domain.usecases.ValidateTransactionUseCase
 import com.transaction.shared.domain.model.ValidationField
 import com.transaction.shared.domain.model.ValidationResult
 import com.transaction.shared.domain.utils.toDecimalOrNull
+import com.transaction.shared.utils.AmountInput
 import io.github.kormium.decimal.Decimal
 import io.github.kormium.decimal.RoundingMode
 import kotlinx.coroutines.channels.Channel
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 
 data class AddTransactionUiState(
@@ -51,7 +53,9 @@ class AddTransactionViewModel(
     val events = _eventChannel.receiveAsFlow()
 
     fun onAmountChange(amount: String) {
-        _uiState.update { it.copy(amount = amount, amountError = null) }
+        // Invalid edits are dropped, so the field keeps its last valid value
+        val sanitized = AmountInput.sanitize(amount) ?: return
+        _uiState.update { it.copy(amount = sanitized, amountError = null) }
     }
 
     fun onDescriptionChange(description: String) {
@@ -68,8 +72,9 @@ class AddTransactionViewModel(
 
     fun validateForm(): Decimal? {
         val currentState = _uiState.value
+        val amountText = AmountInput.finalize(currentState.amount) // "12." -> "12"
         val result = validateTransactionUseCase(
-            currentState.amount,
+            amountText,
             currentState.description,
             currentState.date
         )
@@ -94,16 +99,24 @@ class AddTransactionViewModel(
 
         if (result !is ValidationResult.Valid) return null
 
-        return currentState.amount.toDecimalOrNull()
-            ?.setScale(2, RoundingMode.HALF_UP)
+        val amount = amountText.toDecimalOrNull()?.setScale(2, RoundingMode.HALF_UP)
+        if (amount == null) {
+            // Validation passed but parsing failed: show it instead of making Save do nothing
+            _uiState.update { it.copy(amountError = "Enter a valid amount") }
+        }
+        return amount
     }
     fun submitTransaction() {
+        if (_uiState.value.isSubmitting) return
         val parsedAmount = validateForm() ?: return
 
+        // Snapshot the exact values that were validated; later edits must not change what's saved
+        val validatedState = _uiState.value
+        // Set before launching: a fast double-tap can't start a second save
+        _uiState.update { it.copy(isSubmitting = true) }
         viewModelScope.launch {
-            _uiState.update { it.copy(isSubmitting = true) }
             try {
-                val state = _uiState.value
+                val state = validatedState
                 val transaction = Transaction(
                     amount = parsedAmount,
                     description = state.description,
@@ -112,6 +125,8 @@ class AddTransactionViewModel(
                 )
                 addTransactionUseCase(transaction)
                 _eventChannel.send(AddTransactionViewEvent.Success)
+            } catch (e: CancellationException) {
+                throw e // leaving the screen cancels the save; don't report it as an error
             } catch (e: Exception) {
                 _eventChannel.send(AddTransactionViewEvent.Error(e.message ?: "An unexpected error occurred"))
             } finally {

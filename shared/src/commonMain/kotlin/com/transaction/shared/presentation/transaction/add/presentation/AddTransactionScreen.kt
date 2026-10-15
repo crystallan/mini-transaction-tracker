@@ -88,7 +88,7 @@ fun AddTransactionScreen(
                 supportingText = { uiState.amountError?.let { Text(it) } },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
-                visualTransformation = NumberCommaVisualTransformation(),
+                visualTransformation = remember { NumberCommaVisualTransformation() },
                 modifier = Modifier.fillMaxWidth()
             )
 
